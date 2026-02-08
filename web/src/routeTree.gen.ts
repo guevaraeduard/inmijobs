@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PingRouteImport } from './routes/ping'
+import { Route as HomeRouteImport } from './routes/home'
 import { Route as privateRouteRouteImport } from './routes/(private)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as privateIndexRouteImport } from './routes/(private)/index'
@@ -19,6 +20,11 @@ import { Route as authSigninRouteImport } from './routes/(auth)/signin'
 const PingRoute = PingRouteImport.update({
   id: '/ping',
   path: '/ping',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
   getParentRoute: () => rootRouteImport,
 } as any)
 const privateRouteRoute = privateRouteRouteImport.update({
@@ -46,12 +52,14 @@ const authSigninRoute = authSigninRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
+  '/home': typeof HomeRoute
   '/ping': typeof PingRoute
   '/signin': typeof authSigninRoute
   '/signup': typeof authSignupRoute
   '/': typeof privateIndexRoute
 }
 export interface FileRoutesByTo {
+  '/home': typeof HomeRoute
   '/ping': typeof PingRoute
   '/signin': typeof authSigninRoute
   '/signup': typeof authSignupRoute
@@ -61,6 +69,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/(auth)': typeof authRouteRouteWithChildren
   '/(private)': typeof privateRouteRouteWithChildren
+  '/home': typeof HomeRoute
   '/ping': typeof PingRoute
   '/(auth)/signin': typeof authSigninRoute
   '/(auth)/signup': typeof authSignupRoute
@@ -68,13 +77,14 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/ping' | '/signin' | '/signup' | '/'
+  fullPaths: '/home' | '/ping' | '/signin' | '/signup' | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/ping' | '/signin' | '/signup' | '/'
+  to: '/home' | '/ping' | '/signin' | '/signup' | '/'
   id:
     | '__root__'
     | '/(auth)'
     | '/(private)'
+    | '/home'
     | '/ping'
     | '/(auth)/signin'
     | '/(auth)/signup'
@@ -84,6 +94,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   authRouteRoute: typeof authRouteRouteWithChildren
   privateRouteRoute: typeof privateRouteRouteWithChildren
+  HomeRoute: typeof HomeRoute
   PingRoute: typeof PingRoute
 }
 
@@ -94,6 +105,13 @@ declare module '@tanstack/react-router' {
       path: '/ping'
       fullPath: '/ping'
       preLoaderRoute: typeof PingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/(private)': {
@@ -163,6 +181,7 @@ const privateRouteRouteWithChildren = privateRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   authRouteRoute: authRouteRouteWithChildren,
   privateRouteRoute: privateRouteRouteWithChildren,
+  HomeRoute: HomeRoute,
   PingRoute: PingRoute,
 }
 export const routeTree = rootRouteImport
