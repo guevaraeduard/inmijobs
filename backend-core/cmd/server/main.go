@@ -26,10 +26,16 @@ func main() {
 	}
 
 	authRepository := repository.NewAuthRepository(*db)
+	profileRepository := repository.NewProfileRepository(*db)
 
 	authService := core.NewAuthService(*authRepository)
+	profileService := core.NewProfileService(*profileRepository)
 
 	pingHandler := api.NewPingHandler(*authService)
+	profileHandler := api.NewProfileHandler(*profileService, *authService)
+
+	// Run Seed
+	database.Seed(db)
 
 	r := chi.NewRouter()
 
@@ -40,6 +46,7 @@ func main() {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", pingHandler.Ping)
+		r.Put("/profiles/me", profileHandler.UpdateProfile)
 	})
 
 	port := ":8080"
