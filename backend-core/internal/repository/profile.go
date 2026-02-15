@@ -37,3 +37,11 @@ func (r ProfileRepository) GetProfileByUserID(ctx context.Context, userID string
 	result := r.db.WithContext(ctx).Where("user_id = ?", userID).First(&profile)
 	return profile, result.Error
 }
+
+func (r ProfileRepository) GetUserWithProfile(ctx context.Context, userID string) (model.User, error) {
+	var user model.User
+	err := r.db.WithContext(ctx).
+		Preload("Profile"). 
+		First(&user, "id = ?", userID).Error
+	return user, err
+}

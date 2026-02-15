@@ -7,6 +7,7 @@ import (
 	"github.com/Gabo-div/bingo/inmijobs/backend-core/internal/core"
 	"github.com/Gabo-div/bingo/inmijobs/backend-core/internal/dto"
 	"github.com/Gabo-div/bingo/inmijobs/backend-core/internal/utils"
+	"github.com/go-chi/chi/v5"
 )
 
 type ProfileHandler struct {
@@ -48,4 +49,39 @@ func (h ProfileHandler) UpdateProfile(w http.ResponseWriter, r *http.Request) {
 		Title:     profile.Title,
 		Location:  profile.Location,
 	})
+}
+
+func (h ProfileHandler) GetProfile(w http.ResponseWriter, r *http.Request) {
+	
+	targetID := chi.URLParam(r, "id")
+	if targetID == "" {
+		utils.RespondError(w, http.StatusBadRequest, "User ID is required")
+		return
+	}
+
+	_, errAuth := h.authService.UserFromHeader(r.Context(), r.Header)
+	isLogged := (errAuth == nil)
+
+	user, err := h.profileService.GetFullUser(r.Context(), targetID)
+	if err != nil {
+		utils.RespondError(w, http.StatusNotFound, "User or Profile not found")
+		return
+	}
+
+	res := dto.CombinedProfileResponse{
+		ID:    user.ID,
+		Name:  user.Name,
+		Image: user.Image,
+	}
+
+	if user.Profile != nil {
+		res.Location = user.Profile.Location
+		
+		if isLogged {
+			res.Biography = user.Profile.Biography
+			res.Title = user.Profile.Title
+		}
+	}
+
+	utils.RespondJSON(w, http.StatusOK, res)
 }
