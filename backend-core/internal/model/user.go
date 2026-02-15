@@ -1,10 +1,19 @@
 package model
 
+// Definimos los estados posibles para las conexiones
+type ConnectionStatus string
+
+const (
+	StatusPending  ConnectionStatus = "pending"
+	StatusAccepted ConnectionStatus = "accepted"
+	StatusBlocked  ConnectionStatus = "blocked"
+)
+
 type User struct {
-	ID            string `gorm:"primaryKey"`
-	Name          string `gorm:"not null"`
-	Email         string `gorm:"not null;uniqueIndex"`
-	EmailVerified bool   `gorm:"not null;default:false"`
+	ID            string   `gorm:"primaryKey"`
+	Name          string   `gorm:"not null"`
+	Email         string   `gorm:"not null;uniqueIndex"`
+	EmailVerified bool     `gorm:"not null;default:false"`
 	Image         *string
 	CreatedAt     UnixTime `gorm:"not null;autoCreateTime"`
 	UpdatedAt     UnixTime `gorm:"not null;autoUpdateTime"`
@@ -14,6 +23,23 @@ type User struct {
 	Profile  *Profile  `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
+
+	// Relaciones para las conexiones (Self-referencing many-to-many)
+	// Estas permiten cargar las solicitudes enviadas y recibidas
+	ConnectionsSent     []Connection `gorm:"foreignKey:RequesterID"`
+	ConnectionsReceived []Connection `gorm:"foreignKey:ReceiverID"`
+}
+
+type Connection struct {
+    ID          uint             `gorm:"primaryKey" json:"id"`
+    RequesterID string           `gorm:"not null;index" json:"requester_id"` // Añade etiquetas json
+    Requester   User             `gorm:"foreignKey:RequesterID" json:"-"`
+    ReceiverID  string           `gorm:"not null;index" json:"receiver_id"`
+    Receiver    User             `gorm:"foreignKey:ReceiverID" json:"-"`
+    Status      ConnectionStatus `gorm:"type:text;default:'pending'" json:"status"`
+    CreatedAt   UnixTime         `gorm:"not null;autoCreateTime" json:"created_at"`
+    UpdatedAt   UnixTime         `gorm:"not null;autoUpdateTime" json:"updated_at"`
+}
 type Session struct {
 	ID        string   `gorm:"primaryKey"`
 	ExpiresAt UnixTime `gorm:"not null"`

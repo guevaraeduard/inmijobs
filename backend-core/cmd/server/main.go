@@ -20,19 +20,24 @@ func main() {
 	godotenv.Load()
 
 	db, err := database.NewDatabase()
-
 	if err != nil {
 		log.Fatalf("Fatal Error connecting to database: %v", err)
 	}
 
+	// Repositorios
 	authRepository := repository.NewAuthRepository(*db)
 	profileRepository := repository.NewProfileRepository(*db)
+	connRepository := repository.NewConnectionRepository(db)
 
+	// Servicios
 	authService := core.NewAuthService(*authRepository)
 	profileService := core.NewProfileService(*profileRepository)
 
+	// Handlers
 	pingHandler := api.NewPingHandler(*authService)
 	profileHandler := api.NewProfileHandler(*profileService, *authService)
+	connHandler := api.NewConnectionHandler(connRepository)
+	
 
 	r := chi.NewRouter()
 
@@ -45,6 +50,14 @@ func main() {
 		r.Get("/ping", pingHandler.Ping)
 		r.Put("/profiles/me", profileHandler.UpdateProfile)
 	})
+        
+    r.Route("/connections", func(r chi.Router) {
+        r.Get("/test", connHandler.Ping)         
+        r.Post("/", connHandler.CreateConnection)      
+        r.Put("/{id}", connHandler.UpdateConnection)   
+        r.Delete("/{id}", connHandler.DeleteConnection)
+        })
+    })
 
 	port := ":8080"
 	log.Printf("Server starting on port %s", port)

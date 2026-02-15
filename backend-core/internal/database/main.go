@@ -29,6 +29,7 @@ func NewDatabase() (*gorm.DB, error) {
 		&model.Verification{},
 		&model.Jwks{},
 		&model.Profile{},
+		&model.Connection{},
 	)
 	slog.Info("[Database] Migrations completed")
 
