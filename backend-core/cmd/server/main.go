@@ -48,6 +48,7 @@ func main() {
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", pingHandler.Ping)
 		r.Put("/profiles/me", profileHandler.UpdateProfile)
+    r.Get("/profiles/{id}",profileHandler.GetProfile)
 		r.Route("/jobs/{id}", func(r chi.Router) {
 			r.Get("/", jobHandler.GetJobByID)
 			r.Put("/", jobHandler.UpdateJob)
