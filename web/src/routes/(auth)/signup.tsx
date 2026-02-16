@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 const inputClass = "w-full px-4 py-3.5 border-2 border-[#E5E7EB] rounded-xl text-[16px] bg-white text-[#1F2937] placeholder:text-[#9CA3AF] focus:border-[#F97316] focus:ring-4 focus:ring-[#F97316]/10 transition-all"
-const btnPrimaryClass = "w-full py-4 rounded-xl font-bold text-base cursor-pointer bg-gradient-to-r from-[#F97316] to-[#8B5CF6] text-white hover:from-[#EA580C] hover:to-[#7C3AED] shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
+const btnPrimaryClass = "w-full py-4 rounded-xl font-bold text-base cursor-pointer bg-linear-to-r from-[#F97316] to-[#8B5CF6] text-white hover:from-[#EA580C] hover:to-[#7C3AED] shadow-lg hover:shadow-2xl transform hover:-translate-y-0.5 transition-all duration-200"
 
 export const Route = createFileRoute('/(auth)/signup')({
   component: RouteComponent,

@@ -9,6 +9,7 @@ import { routeTree } from './routeTree.gen'
 
 import './styles.css'
 import reportWebVitals from './reportWebVitals.ts'
+import { UserDataProvider } from './hooks/useUserData.tsx'
 
 // Create a new router instance
 
@@ -38,7 +39,9 @@ if (rootElement && !rootElement.innerHTML) {
   root.render(
     <StrictMode>
       <TanStackQueryProvider.Provider {...TanStackQueryProviderContext}>
-        <RouterProvider router={router} />
+        <UserDataProvider>
+          <RouterProvider router={router} />
+        </UserDataProvider>
       </TanStackQueryProvider.Provider>
     </StrictMode>,
   )
