@@ -24,16 +24,15 @@ func main() {
 		log.Fatalf("Fatal Error connecting to database: %v", err)
 	}
 
-	// Repositorios
 	authRepository := repository.NewAuthRepository(*db)
 	profileRepository := repository.NewProfileRepository(*db)
 	connRepository := repository.NewConnectionRepository(db)
 
-	// Servicios
+
 	authService := core.NewAuthService(*authRepository)
 	profileService := core.NewProfileService(*profileRepository)
 
-	// Handlers
+
 	pingHandler := api.NewPingHandler(*authService)
 	profileHandler := api.NewProfileHandler(*profileService, *authService)
 	connHandler := api.NewConnectionHandler(connRepository)
