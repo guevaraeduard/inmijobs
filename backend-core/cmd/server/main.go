@@ -27,10 +27,13 @@ func main() {
 
 	authRepository := repository.NewAuthRepository(*db)
 	profileRepository := repository.NewProfileRepository(*db)
+	companyRepository := repository.NewCompanyRepository(*db)
 
+	companyService := core.NewCompanyService(*companyRepository)
 	authService := core.NewAuthService(*authRepository)
 	profileService := core.NewProfileService(*profileRepository)
 
+	companyHandler := api.NewCompanyHandler(*companyService)
 	pingHandler := api.NewPingHandler(*authService)
 	profileHandler := api.NewProfileHandler(*profileService, *authService)
 
@@ -44,8 +47,13 @@ func main() {
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", pingHandler.Ping)
 		r.Put("/profiles/me", profileHandler.UpdateProfile)
-	})
 
+	})
+	r.Route("/companies", func(r chi.Router) {
+		r.Post("/", companyHandler.Create)
+		r.Get("/{id}", companyHandler.GetByID)
+
+	})
 	port := ":8080"
 	log.Printf("Server starting on port %s", port)
 	if err := http.ListenAndServe(port, r); err != nil {
