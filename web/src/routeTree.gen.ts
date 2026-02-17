@@ -14,6 +14,7 @@ import { Route as privateRouteRouteImport } from './routes/(private)/route'
 import { Route as authRouteRouteImport } from './routes/(auth)/route'
 import { Route as privateIndexRouteImport } from './routes/(private)/index'
 import { Route as privatePostCardPreviewRouteImport } from './routes/(private)/post-card-preview'
+import { Route as privateJobsRouteImport } from './routes/(private)/jobs'
 import { Route as authSignupRouteImport } from './routes/(auth)/signup'
 import { Route as authSigninRouteImport } from './routes/(auth)/signin'
 
@@ -40,6 +41,11 @@ const privatePostCardPreviewRoute = privatePostCardPreviewRouteImport.update({
   path: '/post-card-preview',
   getParentRoute: () => privateRouteRoute,
 } as any)
+const privateJobsRoute = privateJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => privateRouteRoute,
+} as any)
 const authSignupRoute = authSignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -55,6 +61,7 @@ export interface FileRoutesByFullPath {
   '/ping': typeof PingRoute
   '/signin': typeof authSigninRoute
   '/signup': typeof authSignupRoute
+  '/jobs': typeof privateJobsRoute
   '/post-card-preview': typeof privatePostCardPreviewRoute
   '/': typeof privateIndexRoute
 }
@@ -62,6 +69,7 @@ export interface FileRoutesByTo {
   '/ping': typeof PingRoute
   '/signin': typeof authSigninRoute
   '/signup': typeof authSignupRoute
+  '/jobs': typeof privateJobsRoute
   '/post-card-preview': typeof privatePostCardPreviewRoute
   '/': typeof privateIndexRoute
 }
@@ -72,14 +80,21 @@ export interface FileRoutesById {
   '/ping': typeof PingRoute
   '/(auth)/signin': typeof authSigninRoute
   '/(auth)/signup': typeof authSignupRoute
+  '/(private)/jobs': typeof privateJobsRoute
   '/(private)/post-card-preview': typeof privatePostCardPreviewRoute
   '/(private)/': typeof privateIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/ping' | '/signin' | '/signup' | '/post-card-preview' | '/'
+  fullPaths:
+    | '/ping'
+    | '/signin'
+    | '/signup'
+    | '/jobs'
+    | '/post-card-preview'
+    | '/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/ping' | '/signin' | '/signup' | '/post-card-preview' | '/'
+  to: '/ping' | '/signin' | '/signup' | '/jobs' | '/post-card-preview' | '/'
   id:
     | '__root__'
     | '/(auth)'
@@ -87,6 +102,7 @@ export interface FileRouteTypes {
     | '/ping'
     | '/(auth)/signin'
     | '/(auth)/signup'
+    | '/(private)/jobs'
     | '/(private)/post-card-preview'
     | '/(private)/'
   fileRoutesById: FileRoutesById
@@ -134,6 +150,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof privatePostCardPreviewRouteImport
       parentRoute: typeof privateRouteRoute
     }
+    '/(private)/jobs': {
+      id: '/(private)/jobs'
+      path: '/jobs'
+      fullPath: '/jobs'
+      preLoaderRoute: typeof privateJobsRouteImport
+      parentRoute: typeof privateRouteRoute
+    }
     '/(auth)/signup': {
       id: '/(auth)/signup'
       path: '/signup'
@@ -166,11 +189,13 @@ const authRouteRouteWithChildren = authRouteRoute._addFileChildren(
 )
 
 interface privateRouteRouteChildren {
+  privateJobsRoute: typeof privateJobsRoute
   privatePostCardPreviewRoute: typeof privatePostCardPreviewRoute
   privateIndexRoute: typeof privateIndexRoute
 }
 
 const privateRouteRouteChildren: privateRouteRouteChildren = {
+  privateJobsRoute: privateJobsRoute,
   privatePostCardPreviewRoute: privatePostCardPreviewRoute,
   privateIndexRoute: privateIndexRoute,
 }
