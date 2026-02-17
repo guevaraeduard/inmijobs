@@ -10,6 +10,6 @@ type Job struct {
     EmploymentType string   
     IsActive       bool
     CompanyID      string
-    Company        Company
-    Applications   []Application
+    //Company        Company
+    //Applications   []Application
 }
