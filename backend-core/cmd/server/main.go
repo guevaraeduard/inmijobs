@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/Gabo-div/bingo/inmijobs/backend-core/internal/api"
@@ -26,20 +28,22 @@ func main() {
 
 	authRepository := repository.NewAuthRepository(*db)
 	profileRepository := repository.NewProfileRepository(*db)
-	connRepository := repository.NewConnectionRepository(db)
+	jobRepository := repository.NewJobRepository(*db)
+	connRepository := repository.NewConnectionRepository(*db)
 
 
 	authService := core.NewAuthService(*authRepository)
 	profileService := core.NewProfileService(*profileRepository)
+	jobService := core.NewJobService(*jobRepository)
 
 
 	pingHandler := api.NewPingHandler(*authService)
 	profileHandler := api.NewProfileHandler(*profileService, *authService)
-	connHandler := api.NewConnectionHandler(connRepository)
+	jobHandler := api.NewJobHandler(*jobService, *authService)
+	connHandler := api.NewConnectionHandler(connRepository, *authService)
 	
 
 	r := chi.NewRouter()
-
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
 	r.Use(middleware.StripSlashes)
@@ -47,18 +51,36 @@ func main() {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", pingHandler.Ping)
-		r.Put("/profiles/me", profileHandler.UpdateProfile)
-	})
-        
-    r.Route("/connections", func(r chi.Router) {
-        r.Get("/test", connHandler.Ping)         
-        r.Post("/", connHandler.CreateConnection)      
-        r.Put("/{id}", connHandler.UpdateConnection)   
-        r.Delete("/{id}", connHandler.DeleteConnection)
-        })
+
+		r.Route("/profiles", func(r chi.Router) {
+			r.Put("/me", profileHandler.UpdateProfile)
+			r.Get("/{id}", profileHandler.GetProfile)
+		})
+
+		r.Route("/jobs", func(r chi.Router) {
+			r.Get("/", jobHandler.GetJobs)
+			r.Get("/{id}", jobHandler.GetJobByID)
+			r.Put("/{id}", jobHandler.UpdateJob)
+			r.Delete("/{id}", jobHandler.DeleteJob)
+			r.Post("/{id}/applications", jobHandler.CreateApplication)
+			r.Get("/{id}/applications", jobHandler.GetJobApplications)
+		})
+
+		r.Route("/companies", func(r chi.Router) {
+			r.Put("/{id}", jobHandler.UpdateCompany)
+		})
+
+        r.Route("/connections", func(r chi.Router) {
+        	r.Get("/test", connHandler.Ping)         
+        	r.Post("/", connHandler.CreateConnection)      
+        	r.Put("/{id}", connHandler.UpdateConnection)   
+        	r.Delete("/{id}", connHandler.DeleteConnection)
+
     })
 
-	port := ":8080"
+	})
+	
+	port := fmt.Sprintf(":%s", os.Getenv("PORT"))
 	log.Printf("Server starting on port %s", port)
 	if err := http.ListenAndServe(port, r); err != nil {
 		log.Fatalf("Server failed to start: %v", err)
