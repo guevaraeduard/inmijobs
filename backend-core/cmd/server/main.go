@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/Gabo-div/bingo/inmijobs/backend-core/internal/api"
@@ -20,25 +22,26 @@ func main() {
 	godotenv.Load()
 
 	db, err := database.NewDatabase()
-
 	if err != nil {
 		log.Fatalf("Fatal Error connecting to database: %v", err)
 	}
 
 	authRepository := repository.NewAuthRepository(*db)
 	profileRepository := repository.NewProfileRepository(*db)
+	jobRepository := repository.NewJobRepository(*db)
 	companyRepository := repository.NewCompanyRepository(*db)
 
 	companyService := core.NewCompanyService(*companyRepository)
 	authService := core.NewAuthService(*authRepository)
 	profileService := core.NewProfileService(*profileRepository)
+	jobService := core.NewJobService(*jobRepository)
 
 	companyHandler := api.NewCompanyHandler(*companyService)
 	pingHandler := api.NewPingHandler(*authService)
 	profileHandler := api.NewProfileHandler(*profileService, *authService)
+	jobHandler := api.NewJobHandler(*jobService, *authService)
 
 	r := chi.NewRouter()
-
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
 	r.Use(middleware.StripSlashes)
@@ -46,6 +49,27 @@ func main() {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", pingHandler.Ping)
+
+		r.Route("/profiles", func(r chi.Router) {
+			r.Put("/me", profileHandler.UpdateProfile)
+			r.Get("/{id}", profileHandler.GetProfile)
+		})
+
+		r.Route("/jobs", func(r chi.Router) {
+			r.Get("/", jobHandler.GetJobs)
+			r.Get("/{id}", jobHandler.GetJobByID)
+			r.Put("/{id}", jobHandler.UpdateJob)
+			r.Delete("/{id}", jobHandler.DeleteJob)
+			r.Post("/{id}/applications", jobHandler.CreateApplication)
+			r.Get("/{id}/applications", jobHandler.GetJobApplications)
+		})
+
+		r.Route("/companies", func(r chi.Router) {
+			r.Put("/{id}", jobHandler.UpdateCompany)
+		})
+	})
+
+	port := fmt.Sprintf(":%s", os.Getenv("PORT"))
 		r.Put("/profiles/me", profileHandler.UpdateProfile)
 
 	})
