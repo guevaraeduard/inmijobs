@@ -24,7 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("Fatal Error connecting to database: %v", err)
 	}
-
+	
 	authRepository := repository.NewAuthRepository(*db)
 	profileRepository := repository.NewProfileRepository(*db)
 	jobRepository := repository.NewJobRepository(*db)
@@ -43,7 +43,19 @@ func main() {
 	connHandler := api.NewConnectionHandler(connRepository, *authService)
 	
 
+	commentRepository := repository.NewCommentRepository(db)
+	commentService := core.NewCommentService(*commentRepository)
+	commentHandler := api.NewCommentHandler(*commentService, *authService)
+
+	postRepository := repository.NewPostRepository(db)
+	postService := core.NewPostService(postRepository)
+	postHandler := api.NewPostHandler(postService)
+	interactionRepository := repository.NewInteractionRepository(db)
+    interactionService := core.NewInteractionService(interactionRepository)
+    interactionHandler := api.NewInteractionHandler(interactionService)
 	r := chi.NewRouter()
+	
+
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Logger)
 	r.Use(middleware.StripSlashes)
@@ -51,6 +63,22 @@ func main() {
 
 	r.Route("/api", func(r chi.Router) {
 		r.Get("/ping", pingHandler.Ping)
+		r.Put("/profiles/me", profileHandler.UpdateProfile)
+
+		r.Route("/posts", func(r chi.Router) {
+			r.Post("/", postHandler.CreatePost)
+			r.Put("/{id}", postHandler.EditPost)
+			r.Get("/{id}", postHandler.GetByID)
+			r.Post("/{id}/reactions", interactionHandler.TogglePostReaction)
+            r.Get("/{id}/reactions", interactionHandler.GetPostReactions)
+		})
+
+		r.Route("/comments", func(r chi.Router) {
+			r.Post("/", commentHandler.Create)
+			r.Get("/", commentHandler.List)
+			r.Delete("/{id}", commentHandler.Delete)
+			r.Put("/{id}", commentHandler.Update)
+		})
 
 		r.Route("/profiles", func(r chi.Router) {
 			r.Put("/me", profileHandler.UpdateProfile)

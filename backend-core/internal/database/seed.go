@@ -151,6 +151,7 @@ func Seed(db *gorm.DB) {
 			}
 		}
 	}
+
 	slog.Info("[Database] Seeded applications", "count", len(seededJobs)*10)
 }
 
